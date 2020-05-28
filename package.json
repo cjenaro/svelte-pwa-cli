@@ -1,7 +1,7 @@
 {
   "name": "svelte-pwa",
   "description": "A command line to create a svelte progressive web app starter",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "author": "Jenaro @jenaro94",
   "bin": {
     "svelte-pwa": "./bin/run"
