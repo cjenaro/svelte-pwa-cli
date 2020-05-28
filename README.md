@@ -16,13 +16,13 @@ A command line to create a svelte progressive web app starter
 <!-- usage -->
 ```sh-session
 $ npm install -g svelte-pwa
-$ svelte-pwa my-app
+$ svelte-pwa COMMAND
 running command...
 $ svelte-pwa (-v|--version|version)
-svelte-pwa/2.0.0 linux-x64 node-v10.19.0
+svelte-pwa/2.1.0 linux-x64 node-v10.19.0
 $ svelte-pwa --help [COMMAND]
 USAGE
-  $ svelte-pwa my-app
+  $ svelte-pwa COMMAND
 ...
 ```
 <!-- usagestop -->
