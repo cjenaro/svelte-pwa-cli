@@ -29,15 +29,21 @@ const changeThemeColor = (html, color) => {
 
 class SveltePwaCommand extends Command {
   async run() {
+    const {args} = this.parse(SveltePwaCommand)
+    if (!args.path) {
+      this.error('Please specify a path')
+      return
+    }
+
     const name = await cli.prompt('App name')
     const description = await cli.prompt('App description')
     const themeColor = await cli.prompt('Theme color (hex)')
     const backgroundColor = await cli.prompt('Theme background color (hex)')
     const routify = await cli.confirm('Do you want to include routify? n/y')
     cli.action.start('Creating project', 'initializing', {stdout: true})
-    this.log(`npx degit tretapey/svelte-pwa ${name}`)
-    await execa('npx', ['degit', 'tretapey/svelte-pwa', name])
-    const packageJS = await execa('cat', [`${name}/package.json`])
+    this.log(`npx degit tretapey/svelte-pwa ${args.path}`)
+    await execa('npx', ['degit', 'tretapey/svelte-pwa', args.path])
+    const packageJS = await execa('cat', [`${args.path}/package.json`])
     const packageObj = JSON.parse(packageJS.stdout)
     packageObj.name = name
     if (routify) {
@@ -47,9 +53,9 @@ class SveltePwaCommand extends Command {
       packageObj.scripts.start = 'sirv public --single'
       packageObj.scripts.build = 'routify -b && rollup -c'
       packageObj.devDependencies['@sveltech/routify'] = '^1.7.12'
-      await execa('mkdir', [`${name}/src/pages/`])
-      await execa('mv', [`${name}/src/App.svelte`, `${name}/src/pages/index.svelte`])
-      await fs.writeFile(`${name}/src/App.svelte`,
+      await execa('mkdir', [`${args.path}/src/pages/`])
+      await execa('mv', [`${args.path}/src/App.svelte`, `${args.path}/src/pages/index.svelte`])
+      await fs.writeFile(`${args.path}/src/App.svelte`,
         `<script>
             import { Router } from "@sveltech/routify";
             import { routes } from "@sveltech/routify/tmp/routes";
@@ -67,14 +73,14 @@ class SveltePwaCommand extends Command {
       this.log('Routify installed.')
     }
     this.log('Overriding files...')
-    const manifest = await execa('cat', [`${name}/public/manifest.json`])
+    const manifest = await execa('cat', [`${args.path}/public/manifest.json`])
     const manifestObj = JSON.parse(manifest.stdout)
     manifestObj.name = name
     manifestObj.short_name = name
     manifestObj.theme_color = themeColor
     manifestObj.background_color = backgroundColor
-    const indexCat = await execa('cat', [`${name}/public/index.html`])
-    const offlineCat = await execa('cat', [`${name}/public/offline.html`])
+    const indexCat = await execa('cat', [`${args.path}/public/index.html`])
+    const offlineCat = await execa('cat', [`${args.path}/public/offline.html`])
     let indexHTML = HTMLParser.parse(indexCat.stdout)
     let offlineHTML = HTMLParser.parse(offlineCat.stdout)
     changeTitle(indexHTML, name)
@@ -83,7 +89,7 @@ class SveltePwaCommand extends Command {
     changeDescription(offlineHTML, description)
     changeThemeColor(indexHTML, themeColor)
     changeThemeColor(offlineHTML, themeColor)
-    await fs.appendFile(`${name}/public/global.css`,
+    await fs.appendFile(`${args.path}/public/global.css`,
       `
       root: {
         --theme-color: ${themeColor};
@@ -98,28 +104,28 @@ class SveltePwaCommand extends Command {
         }
       }
     )
-    await fs.writeFile(`${name}/package.json`, JSON.stringify(packageObj, null, 2), err => {
+    await fs.writeFile(`${args.path}/package.json`, JSON.stringify(packageObj, null, 2), err => {
       if (err) {
         this.error(err)
       } else {
         this.log('Succesfully overwrote package.json')
       }
     })
-    await fs.writeFile(`${name}/public/manifest.json`, JSON.stringify(manifestObj, null, 2), err => {
+    await fs.writeFile(`${args.path}/public/manifest.json`, JSON.stringify(manifestObj, null, 2), err => {
       if (err) {
         this.error(err)
       } else {
         this.log('Succesfully overwrote manifest.json')
       }
     })
-    await fs.writeFile(`${name}/public/index.html`, indexHTML.toString(), err => {
+    await fs.writeFile(`${args.path}/public/index.html`, indexHTML.toString(), err => {
       if (err) {
         this.error(err)
       } else {
         this.log('Succesfully overwrote index.html')
       }
     })
-    await fs.writeFile(`${name}/public/offline.html`, offlineHTML.toString(), err => {
+    await fs.writeFile(`${args.path}/public/offline.html`, offlineHTML.toString(), err => {
       if (err) {
         this.error(err)
       } else {
@@ -129,7 +135,7 @@ class SveltePwaCommand extends Command {
     cli.action.stop()
     this.log('*-----------------------------------*')
     this.log('Svelte PWA starter template is ready')
-    this.log(`run cd ${name} && npm run install`)
+    this.log(`run cd ${args.path} && npm run install`)
     this.log('npm run dev for hot reloading')
     this.log('*-----------------------------------*')
     this.log('Developed by https://github.com/jenaro94 using https://github.com/tretapey/svelte-pwa')
@@ -140,6 +146,8 @@ SveltePwaCommand.description = `This is a CLI to automate some of the svelte pwa
 ...
 After finishing, cd into your folder, install dependencies and npm run dev to start developing
 `
+
+SveltePwaCommand.args = [{name: 'path'}]
 
 SveltePwaCommand.flags = {
   // add --version flag to show CLI version
