@@ -19,7 +19,7 @@ $ npm install -g svelte-pwa
 $ svelte-pwa COMMAND
 running command...
 $ svelte-pwa (-v|--version|version)
-svelte-pwa/1.0.0 linux-x64 node-v10.19.0
+svelte-pwa/2.0.0 linux-x64 node-v10.19.0
 $ svelte-pwa --help [COMMAND]
 USAGE
   $ svelte-pwa COMMAND
