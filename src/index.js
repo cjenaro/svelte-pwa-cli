@@ -3,6 +3,7 @@ const {cli} = require('cli-ux')
 const execa = require('execa')
 const HTMLParser = require('node-html-parser')
 const fs = require('fs')
+const templates = require('./templates')
 
 const changeTitle = (html, appName) => {
   const title = html.querySelector('title')
@@ -27,6 +28,11 @@ const changeThemeColor = (html, color) => {
   })
 }
 
+const appendFavicons = (html, name, themeColor) => {
+  const head = html.querySelector('head')
+  head.insertAdjacentHTML('beforeend', templates.favicons(name, themeColor))
+}
+
 class SveltePwaCommand extends Command {
   async run() {
     const {args} = this.parse(SveltePwaCommand)
@@ -40,6 +46,7 @@ class SveltePwaCommand extends Command {
     const themeColor = await cli.prompt('Theme color (hex)')
     const backgroundColor = await cli.prompt('Theme background color (hex)')
     const routify = await cli.confirm('Do you want to include routify? n/y')
+    const usingFavicomatic = await cli.confirm('Are you using favicomatic for your icons? n/y')
     cli.action.start('Creating project', 'initializing', {stdout: true})
     this.log(`npx degit tretapey/svelte-pwa ${args.path}`)
     await execa('npx', ['degit', 'tretapey/svelte-pwa', args.path])
@@ -55,13 +62,7 @@ class SveltePwaCommand extends Command {
       packageObj.devDependencies['@sveltech/routify'] = '^1.7.12'
       await execa('mkdir', [`${args.path}/src/pages/`])
       await execa('mv', [`${args.path}/src/App.svelte`, `${args.path}/src/pages/index.svelte`])
-      await fs.writeFile(`${args.path}/src/App.svelte`,
-        `<script>
-            import { Router } from "@sveltech/routify";
-            import { routes } from "@sveltech/routify/tmp/routes";
-          </script>
-
-          <Router {routes} />`,
+      await fs.writeFile(`${args.path}/src/App.svelte`, templates.app,
         err => {
           if (err) {
             this.error(err)
@@ -89,13 +90,16 @@ class SveltePwaCommand extends Command {
     changeDescription(offlineHTML, description)
     changeThemeColor(indexHTML, themeColor)
     changeThemeColor(offlineHTML, themeColor)
-    await fs.appendFile(`${args.path}/public/global.css`,
-      `
-      root: {
-        --theme-color: ${themeColor};
-        --background-color: ${backgroundColor};
-      }
-      `,
+    if (usingFavicomatic) {
+      manifestObj.icons = templates.favicomatic.map(size => ({
+        src: `images/icons/mstile-${size}.png`,
+        sizes: size,
+        type: 'image/png',
+      }))
+      appendFavicons(indexHTML, name, themeColor)
+      appendFavicons(offlineHTML, name, themeColor)
+    }
+    await fs.appendFile(`${args.path}/public/global.css`, templates.css(themeColor, backgroundColor),
       err => {
         if (err) {
           this.error(err)
@@ -137,6 +141,8 @@ class SveltePwaCommand extends Command {
     this.log('Svelte PWA starter template is ready')
     this.log(`run cd ${args.path} && npm run install`)
     this.log('npm run dev for hot reloading')
+    this.log('if you chose to use favicomatic just replace')
+    this.log('all the icons in images/icons without changin their names')
     this.log('*-----------------------------------*')
     this.log('Developed by https://github.com/jenaro94 using https://github.com/tretapey/svelte-pwa')
   }
