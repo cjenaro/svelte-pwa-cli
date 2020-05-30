@@ -1,11 +1,4 @@
-exports.app = `<script>
-  import { Router } from '@sveltech/routify';
-  import { routes } from '@sveltech/routify/tmp/routes';
-</script>
-
-<Router {routes} />`
-
-exports.css = (themeColor, backgroundColor) => `root: {
+exports.css = (themeColor, backgroundColor) => `:root {
   --theme-color: ${themeColor};
   --background-color: ${backgroundColor};
 }`
