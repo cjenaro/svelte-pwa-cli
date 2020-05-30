@@ -58,7 +58,7 @@ class SveltePwaCommand extends Command {
     }
     const packageJS = await execa('cat', [`${args.path}/package.json`])
     const packageObj = JSON.parse(packageJS.stdout)
-    packageObj.name = name
+    packageObj.name = args.path
     this.log('Overriding files...')
     const manifest = await execa('cat', [`${args.path}/public/manifest.json`])
     const manifestObj = JSON.parse(manifest.stdout)
@@ -125,12 +125,14 @@ class SveltePwaCommand extends Command {
     cli.action.stop()
     this.log('*-----------------------------------*')
     this.log('Svelte PWA starter template is ready')
-    this.log(`run cd ${args.path} && npm run install`)
+    this.log(`run cd ${args.path} && npm install`)
     this.log('npm run dev for hot reloading')
     this.log('if you chose to use favicomatic just replace')
-    this.log('all the icons in images/icons without changin their names')
+    this.log('all the icons in images/icons without changing their names')
     this.log('*-----------------------------------*')
-    this.log('Developed by https://github.com/jenaro94 using https://github.com/tretapey/svelte-pwa')
+    this.log(`Developed by https://github.com/jenaro94
+              using https://github.com/tretapey/svelte-pwa
+              and my own https://github.com/jenaro94/routify-pwa-starter`)
   }
 }
 
