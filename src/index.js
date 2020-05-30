@@ -46,33 +46,19 @@ class SveltePwaCommand extends Command {
     const themeColor = await cli.prompt('Theme color (hex)')
     const backgroundColor = await cli.prompt('Theme background color (hex)')
     const routify = await cli.confirm('Do you want to include routify? n/y')
+    this.log('https://favicomatic.com/')
     const usingFavicomatic = await cli.confirm('Are you using favicomatic for your icons? n/y')
     cli.action.start('Creating project', 'initializing', {stdout: true})
-    this.log(`npx degit tretapey/svelte-pwa ${args.path}`)
-    await execa('npx', ['degit', 'tretapey/svelte-pwa', args.path])
+    if (routify) {
+      this.log(`npx degit jenaro94/routify-pwa-starter ${args.path}`)
+      await execa('npx', ['degit', 'jenaro94/routify-pwa-starter', args.path])
+    } else {
+      this.log(`npx degit tretapey/svelte-pwa ${args.path}`)
+      await execa('npx', ['degit', 'tretapey/svelte-pwa', args.path])
+    }
     const packageJS = await execa('cat', [`${args.path}/package.json`])
     const packageObj = JSON.parse(packageJS.stdout)
     packageObj.name = name
-    if (routify) {
-      this.log('Installing routify...')
-      packageObj.scripts.dev = 'routify -c server'
-      packageObj.scripts.server = 'rollup -c -w'
-      packageObj.scripts.start = 'sirv public --single'
-      packageObj.scripts.build = 'routify -b && rollup -c'
-      packageObj.devDependencies['@sveltech/routify'] = '^1.7.12'
-      await execa('mkdir', [`${args.path}/src/pages/`])
-      await execa('mv', [`${args.path}/src/App.svelte`, `${args.path}/src/pages/index.svelte`])
-      await fs.writeFile(`${args.path}/src/App.svelte`, templates.app,
-        err => {
-          if (err) {
-            this.error(err)
-          } else {
-            this.log('Successfully created file structure for routify')
-          }
-        }
-      )
-      this.log('Routify installed.')
-    }
     this.log('Overriding files...')
     const manifest = await execa('cat', [`${args.path}/public/manifest.json`])
     const manifestObj = JSON.parse(manifest.stdout)
