@@ -5,6 +5,12 @@ exports.css = (themeColor, backgroundColor) => `:root {
 
 exports.favicomatic = ['144x144', '70x70', '150x150', '310x150', '310x310']
 
+exports.noscript = `  <noscript>
+      <div>
+        Oops! Javascript required here! Allow it and try again!
+      </div>
+    </noscript>`
+
 exports.favicons = (name, themeColor) => `  <link rel="apple-touch-icon-precomposed" sizes="57x57" href="images/icons/apple-touch-icon-57x57.png" />
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/icons/apple-touch-icon-114x114.png" />
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/icons/apple-touch-icon-72x72.png" />

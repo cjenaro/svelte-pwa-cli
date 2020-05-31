@@ -28,6 +28,10 @@ const changeThemeColor = (html, color) => {
   })
 }
 
+const htmlWithNoscript = html => {
+  return html.toString().replace('<noscript></noscript>', templates.noscript)
+}
+
 const appendFavicons = (html, name, themeColor) => {
   const head = html.querySelector('head')
   head.insertAdjacentHTML('beforeend', templates.favicons(name, themeColor))
@@ -68,8 +72,8 @@ class SveltePwaCommand extends Command {
     manifestObj.background_color = backgroundColor
     const indexCat = await execa('cat', [`${args.path}/public/index.html`])
     const offlineCat = await execa('cat', [`${args.path}/public/offline.html`])
-    let indexHTML = HTMLParser.parse(indexCat.stdout)
-    let offlineHTML = HTMLParser.parse(offlineCat.stdout)
+    let indexHTML = HTMLParser.parse(indexCat.stdout, {script: true})
+    let offlineHTML = HTMLParser.parse(offlineCat.stdout, {script: true})
     changeTitle(indexHTML, name)
     changeTitle(offlineHTML, name)
     changeDescription(indexHTML, description)
@@ -108,14 +112,14 @@ class SveltePwaCommand extends Command {
         this.log('Succesfully overwrote manifest.json')
       }
     })
-    await fs.writeFile(`${args.path}/public/index.html`, indexHTML.toString(), err => {
+    await fs.writeFile(`${args.path}/public/index.html`, htmlWithNoscript(indexHTML), err => {
       if (err) {
         this.error(err)
       } else {
         this.log('Succesfully overwrote index.html')
       }
     })
-    await fs.writeFile(`${args.path}/public/offline.html`, offlineHTML.toString(), err => {
+    await fs.writeFile(`${args.path}/public/offline.html`, htmlWithNoscript(offlineHTML), err => {
       if (err) {
         this.error(err)
       } else {
